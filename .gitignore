@@ -1,0 +1,23 @@
+# Python
+.venv/
+__pycache__/
+*.pyc
+*.pyd
+*.pyo
+.pytest_cache/
+.mypy_cache/
+
+# Data / simulation outputs
+*.h5
+*.hdf5
+
+# Rust build artefacts
+engine/target/
+target/
+
+# Maturin / wheel output
+dist/
+*.egg-info/
+
+# IDE
+.vscode/

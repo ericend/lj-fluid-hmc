@@ -1,0 +1,18 @@
+[package]
+name = "engine"
+version = "0.1.0"
+edition = "2021"
+description = "High-performance physics kernels for the LJ-HMC simulation (PyO3 extension)"
+
+[lib]
+name = "engine"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.30", features = ["extension-module"] }
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+

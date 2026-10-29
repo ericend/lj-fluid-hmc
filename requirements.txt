@@ -1,0 +1,5 @@
+numpy
+pytest
+maturin
+mypy
+h5py

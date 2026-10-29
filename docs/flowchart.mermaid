@@ -1,0 +1,21 @@
+---
+config:
+  flowchart:
+    curve: cardinal
+---
+flowchart TD
+    A[Initialization: Setup N, Density, T, Cutoff rc, L, dt] --> B((Place N Particles on Lattice & Calculate Initial Forces & Potential Energy U_old))
+    B --> C[Start HMC Trajectory Loop]
+    C --> D[Refresh Momenta: Sample p_i ~ Maxwell-Boltzmann at Temp T]
+    D --> E[Calculate Initial Total Energy: H_old = K_old + U_old]
+    E --> F[Run Velocity Verlet MD Trajectory: L steps of size dt]
+    F --> G[Calculate Proposed Potential U_new & Kinetic K_new]
+    G --> H[Compute Energy Error: ΔH = H_new - H_old]
+    H --> I{Metropolis Rule: Rand < exp -ΔH / T ?}
+    I -- Yes --> J[Accept Trial Move: r = r_prop, U_old = U_new]
+    I -- No --> K[Reject Trial Move: Restore r = r_old, Keep U_old]
+    J --> L[Accumulate Observables: Potential Energy, Virial Pressure, g r]
+    K --> L
+    L --> M{Completed All Trajectories?}
+    M -- No --> C
+    M -- Yes --> N[Compute Ensemble Averages & Terminate]

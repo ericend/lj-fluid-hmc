@@ -1,0 +1,19 @@
+[build-system]
+requires = ["maturin>=1.7,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "engine"
+version = "0.1.0"
+requires-python = ">=3.12"
+description = "Rust physics kernels for the LJ-HMC simulation"
+
+[tool.maturin]
+# Points maturin at the Rust crate inside the engine/ subdirectory
+manifest-path = "engine/Cargo.toml"
+# The resulting .pyd on Windows will be importable as `import engine`
+module-name = "engine"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
