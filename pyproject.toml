@@ -15,5 +15,5 @@ manifest-path = "engine/Cargo.toml"
 module-name = "engine"
 
 [tool.pytest.ini_options]
-pythonpath = ["."]
+pythonpath = [".", "engine/src"]
 testpaths = ["tests"]

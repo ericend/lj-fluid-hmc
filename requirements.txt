@@ -3,3 +3,4 @@ pytest
 maturin
 mypy
 h5py
+matplotlib
