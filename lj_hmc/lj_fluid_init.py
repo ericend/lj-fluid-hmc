@@ -16,7 +16,7 @@ def init_fcc(
     """
     Initialize a Lennard-Jones fluid on an FCC lattice from physical density.
 
-    Particles are placed on a face-centred-cubic (FCC) lattice that fills a
+    N particles are placed on a face-centred-cubic (FCC) lattice that fills a
     cubic periodic box whose volume reproduces the requested mass density.
     Optionally, a small random displacement is applied to break the lattice
     symmetry. With the default ``jiggle=0.0`` the lattice is perfect.

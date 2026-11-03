@@ -3,17 +3,25 @@ requires = ["maturin>=1.7,<2.0"]
 build-backend = "maturin"
 
 [project]
-name = "engine"
+name = "lj-hmc"
 version = "0.1.0"
 requires-python = ">=3.12"
-description = "Rust physics kernels for the LJ-HMC simulation"
+description = "LJ-HMC simulation with Rust physics kernels"
 
 [tool.maturin]
-# Points maturin at the Rust crate inside the engine/ subdirectory
 manifest-path = "engine/Cargo.toml"
-# The resulting .pyd on Windows will be importable as `import engine`
-module-name = "engine"
+module-name = "lj_hmc._core"
+python-source = "."
 
 [tool.pytest.ini_options]
-pythonpath = [".", "engine/src"]
+pythonpath = ["."]
 testpaths = ["tests"]
+
+[tool.pyright]
+extraPaths = ["."]
+venvPath = "."
+venv = ".venv"
+typeCheckingMode = "strict"
+
+[tool.ruff.lint]
+extend-select = ["ANN"]

@@ -20,4 +20,5 @@ dist/
 *.egg-info/
 
 # IDE
-.vscode/
+.vscode/*.pdb
+.ruff_cache/

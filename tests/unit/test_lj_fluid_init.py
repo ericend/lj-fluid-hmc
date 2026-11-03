@@ -1,9 +1,10 @@
 from typing import Literal
 
-import lj_fluid_init
 import numpy as np
 import pytest
-from lj_fluid_init import AVOGADRO, init_fcc
+
+from engine import lj_fluid_init
+from lj_hmc.lj_fluid_init import AVOGADRO, init_fcc
 
 # Standard argon values
 A_DENSITY = 1.374  # g/cm^3, liquid argon ~90 K
