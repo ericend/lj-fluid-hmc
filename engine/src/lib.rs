@@ -39,7 +39,7 @@ pub fn lennard_jones(r: Vec<f64>, epsilon: f64, sigma: f64) -> PyResult<f64> {
 }
 
 #[pymodule]
-fn engine(m: &Bound<'_, PyModule>) -> PyResult<()> {
+fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(lennard_jones, m)?)?;
     Ok(())
 }

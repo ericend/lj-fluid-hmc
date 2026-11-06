@@ -11,12 +11,14 @@ from pathlib import Path
 
 def generate_stubs() -> None:
     try:
-        import engine
+        from lj_hmc import _core as engine
     except ImportError:
-        print("Error: Could not import 'engine'. Did you run 'maturin develop' first?")
+        print(
+            "Error: Could not import 'lj_hmc._core'. Did you run 'maturin develop' first?"
+        )
         return
 
-    output_path: Path: Path = Path(__file__).parent / "engine.pyi"
+    output_path = Path(__file__).parent / "lj_hmc" / "_core.pyi"
     lines: list[str] = [
         '"""Type stubs for the compiled Rust engine extension.',
         "",

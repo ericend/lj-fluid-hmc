@@ -5,7 +5,7 @@ Tests for the Rust `engine` extension module.
 import pytest
 
 try:
-    import engine
+    from lj_hmc import _core as engine
 
     if not hasattr(engine, "lennard_jones"):
         pytest.skip(
@@ -17,7 +17,7 @@ except ImportError:
     )
 
 
-def test_potential_is_zero_at_sigma():
+def test_potential_is_zero_at_sigma() -> None:
     epsilon = 2.0
     sigma = 1.5
     r = [sigma, 0.0, 0.0]
@@ -27,7 +27,7 @@ def test_potential_is_zero_at_sigma():
     assert potential == pytest.approx(0.0)
 
 
-def test_potential_minimum_is_negative_epsilon():
+def test_potential_minimum_is_negative_epsilon() -> None:
     epsilon = 2.0
     sigma = 1.5
     r_min = 2 ** (1 / 6) * sigma
@@ -38,7 +38,7 @@ def test_potential_minimum_is_negative_epsilon():
     assert potential == pytest.approx(-epsilon)
 
 
-def test_potential_is_repulsive_below_sigma():
+def test_potential_is_repulsive_below_sigma() -> None:
     epsilon = 1.0
     sigma = 1.5
     r = [1.0, 0.0, 0.0]
@@ -48,7 +48,7 @@ def test_potential_is_repulsive_below_sigma():
     assert potential > 0.0
 
 
-def test_potential_attractive_above_sigma():
+def test_potential_attractive_above_sigma() -> None:
     epsilon = 1.0
     sigma = 1.5
     r = [2.0, 0.0, 0.0]
@@ -58,7 +58,7 @@ def test_potential_attractive_above_sigma():
     assert potential < 0.0
 
 
-def test_zero_separation_raises_value_error():
+def test_zero_separation_raises_value_error() -> None:
     epsilon = 1.0
     sigma = 1.5
     r = [0.0, 0.0, 0.0]
@@ -68,7 +68,7 @@ def test_zero_separation_raises_value_error():
 
 
 @pytest.mark.parametrize("sigma", [0.0, -0.1, -1.0])
-def test_nonpositive_sigma_raises_value_error(sigma):
+def test_nonpositive_sigma_raises_value_error(sigma: float) -> None:
     with pytest.raises(ValueError):
         engine.lennard_jones(
             [1.0, 0.0, 0.0],

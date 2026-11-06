@@ -3,8 +3,6 @@
 > **SI2530 / FSI3080 HT26 — Hybrid Monte Carlo for a Lennard-Jones Fluid**
 > KTH Computational Physics | Eric Enderborg
 
-This guide walks you through setting up the repository from scratch on a fresh machine.
-
 ---
 
 ## Prerequisites
@@ -12,113 +10,76 @@ This guide walks you through setting up the repository from scratch on a fresh m
 | Tool | Version | Install |
 |------|---------|---------|
 | **Python** | ≥ 3.12 | [python.org](https://www.python.org/downloads/) |
-| **Rust** | stable (≥ 1.80) | [rustup.rs](https://rustup.rs/) — run the installer, restart your terminal |
+| **Rust** | stable (≥ 1.80) | [rustup.rs](https://rustup.rs/), then open a **new** terminal |
 | **Git** | any | [git-scm.com](https://git-scm.com/) |
 
-> [!IMPORTANT]
-> Rust **must** be installed before you can build the `engine` module.
-> After running the rustup installer, open a **new** terminal so `cargo` and `rustc` are on your PATH.
+On Windows you also need the MSVC Build Tools (see Troubleshooting).
 
 ---
 
-## 1 — Clone the repository
+## Setup
 
 ```powershell
-git clone <repo-url>
-cd "SI2530 - FSI3080 HT26 Computational Physics/Final"
-```
+git clone <repo-url> lj-fluid-hmc
+cd lj-fluid-hmc
 
----
-
-## 2 — Create and activate the virtual environment
-
-```powershell
 python -m venv .venv
-.venv\Scripts\Activate.ps1   # PowerShell
-# or: .venv\Scripts\activate.bat   # CMD
+.venv\Scripts\Activate.ps1        # PowerShell
+# or: source .venv/Scripts/activate   # Git Bash
+
+python -m pip install -r requirements.txt
+maturin develop
+pytest -rs
 ```
 
 > [!TIP]
-> If PowerShell blocks the activation script, run once:
-> `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+> If PowerShell blocks activation: `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned`
+
+> [!NOTE]
+> Always use `python -m pip`, so packages go into the venv you are running.
+> Venvs store absolute paths. If you move the project folder, recreate `.venv`.
+
+`maturin develop` compiles the Rust crate in `engine/` and installs the project
+in editable mode. The compiled module is importable as `lj_hmc._core`.
+Use `maturin develop --release` for benchmarking.
 
 ---
 
-## 3 — Install Python dependencies
+## Daily workflow
 
-```powershell
-python -m pip install -r requirements.txt
-```
-
-This installs `numpy`, `pytest`, and `maturin`.
-
----
-
-## 4 — Build the Rust extension
-
-```powershell
-maturin develop
-```
-
-This compiles the `engine/` Rust crate and installs it as a native Python module
-directly into `.venv`. After this, `import engine` works from anywhere in the project.
-
-### Release build (for benchmarking)
-
-```powershell
-maturin develop --release
-```
+| You changed | Run |
+|-------------|-----|
+| Python code | nothing (editable install) |
+| Rust code, `Cargo.toml`, `pyproject.toml` | `maturin develop` |
+| Rust API | `maturin develop`, then `python gen_stubs.py` |
+| Anything | `pytest -rs`, `ruff check`, `pyright` |
 
 ---
 
-## 5 — Run the test suite
+## Usage
 
-```powershell
-pytest
-```
-
----
-
-## Project layout
-
-```
-Final/
-├── core/
-│   └── calcs/
-│       └── lennard_jones.py       # Pure-Python reference
-├── engine/                        # Rust extension
-│   ├── Cargo.toml                 # Rust package manifest
-│   └── src/
-│       └── lib.rs                 # Rust physics kernels
-├── tests/
-│   └── unit/
-│       ├── test_calcs.py          # Tests for the Python reference
-│       └── test_engine.py         # Tests for the Rust engine
-├── pyproject.toml                 # Maturin build config
-├── requirements.txt               # Python dependencies
-├── README.md                      # Project description
-└── GETTING_STARTED.md             # ← you are here
-```
-
----
-
-## Using the Rust engine in your code
+Run scripts from the project root:
 
 ```python
-from engine import lennard_jones
-
-# Pairwise potential between two particles
-u = lennard_jones(r=[1.5, 0.0, 0.0], epsilon=1.0, sigma=1.0)
+from lj_hmc import _core
+from lj_hmc.lj_fluid_init import AVOGADRO, init_fcc
 ```
+
+Use one import style everywhere. Mixing `lj_fluid_init` and `lj_hmc.lj_fluid_init`
+loads the module twice and breaks `monkeypatch` in tests.
 
 ---
 
-## Adding new Rust functions
+## Adding Rust functions
 
-1. Write your function in [`engine/src/lib.rs`](engine/src/lib.rs) with the `#[pyfunction]` attribute.
-2. Register it in `engine` at the bottom of `lib.rs`.
-3. Run `maturin develop`.
-4. Import and call it from Python.
+1. Write the function in `engine/src/lib.rs` with `#[pyfunction]`.
+2. Register it in `#[pymodule] fn _core`.
+3. Run `maturin develop`, then `python gen_stubs.py`.
+
+> [!IMPORTANT]
+> `_core` must match in three places: `[lib] name` in `engine/Cargo.toml`,
+> the `#[pymodule]` function in `lib.rs`, and `module-name = "lj_hmc._core"`
+> in `pyproject.toml`.
 
 ---
 
@@ -126,8 +87,11 @@ u = lennard_jones(r=[1.5, 0.0, 0.0], epsilon=1.0, sigma=1.0)
 
 | Problem | Fix |
 |---------|-----|
-| `cargo: command not found` | Restart terminal after installing Rust via rustup |
-| `maturin: command not found` | Activate the venv first: `.venv\Scripts\Activate.ps1` |
-| `ModuleNotFoundError: No module named 'engine'` | Run `maturin develop` |
+| `cargo: command not found` | Restart the terminal after installing Rust |
+| `maturin: command not found` | Activate the venv first |
+| `ModuleNotFoundError: lj_hmc._core` | Run `maturin develop`; check `lj_hmc/_core*.pyd` exists |
+| `test_engine.py` skipped | Extension not built; run `maturin develop`, then `pytest -rs` |
+| Pylance cannot resolve `lj_hmc` | Open the project root, select the `.venv` interpreter, then `Developer: Reload Window`. Pylance reads `[tool.pyright]`, not pytest's `pythonpath` |
+| Build error about module name | See the `_core` note above |
 | PowerShell script blocked | `Set-ExecutionPolicy -Scope CurrentUser RemoteSigned` |
-| Build fails with linker error | Install the **MSVC Build Tools**: [aka.ms/buildtools](https://aka.ms/buildtools) — tick "Desktop development with C++" |
+| Linker error on Windows | Install [MSVC Build Tools](https://aka.ms/buildtools), tick "Desktop development with C++" |
