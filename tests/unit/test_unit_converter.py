@@ -1,7 +1,7 @@
 import math
 
-from modules.parameters import ARGON as u
-from modules.parameters import celsius_to_kelvin
+from modules.system_init.system import ARGON as u
+from modules.system_init.system import celsius_to_kelvin
 
 
 def test_tau_argon() -> None:
@@ -9,7 +9,7 @@ def test_tau_argon() -> None:
 
 
 def test_round_trips() -> None:
-    assert math.isclose(u.temp_si(u.temp_red(300.0)), 300.0)
+    assert math.isclose(u.temperature_SI, 300.0)
     assert math.isclose(u.density_si(u.density_red(1374.0)), 1374.0)
     assert math.isclose(u.pressure_si(u.pressure_red(1e5)), 1e5)
 

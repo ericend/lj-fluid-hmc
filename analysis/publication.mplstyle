@@ -1,0 +1,64 @@
+# --- Figure (one column of a 10 pt two-column article) ---
+figure.figsize: 3.4, 2.6
+figure.dpi: 150
+figure.constrained_layout.use: true
+figure.constrained_layout.h_pad: 0.03
+figure.constrained_layout.w_pad: 0.03
+
+# --- Saving ---
+savefig.dpi: 300
+savefig.bbox: tight
+savefig.pad_inches: 0.02
+savefig.facecolor: white
+savefig.edgecolor: white
+pdf.fonttype: 42
+ps.fonttype: 42
+
+# --- Fonts & text (match the LaTeX body) ---
+font.family: serif
+mathtext.fontset: cm
+# text.usetex: true
+font.size: 8
+axes.labelsize: 8
+axes.titlesize: 9
+xtick.labelsize: 7
+ytick.labelsize: 7
+legend.fontsize: 7
+axes.formatter.use_mathtext: true
+
+# --- Axes ---
+axes.linewidth: 0.6
+axes.spines.top: false
+axes.spines.right: false
+axes.titleweight: normal
+axes.labelweight: normal
+axes.axisbelow: true
+axes.labelpad: 3
+
+# --- Grid ---
+axes.grid: true
+grid.color: 0.88
+grid.linestyle: -
+grid.linewidth: 0.4
+
+# --- Lines & markers ---
+lines.linewidth: 1.0
+lines.markersize: 3
+errorbar.capsize: 2
+# Okabe-Ito (colorblind-safe)
+axes.prop_cycle: cycler('color', ['0072B2', 'D55E00', '009E73', 'E69F00', 'CC79A7', '56B4E9', '000000'])
+
+# --- Ticks ---
+xtick.direction: out
+ytick.direction: out
+xtick.major.width: 0.6
+ytick.major.width: 0.6
+xtick.major.size: 3
+ytick.major.size: 3
+xtick.major.pad: 2
+ytick.major.pad: 2
+
+# --- Legend ---
+legend.frameon: false
+legend.loc: best
+legend.handlelength: 1.5
