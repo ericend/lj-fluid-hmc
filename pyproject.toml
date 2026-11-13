@@ -19,8 +19,6 @@ testpaths = ["tests"]
 
 [tool.pyright]
 extraPaths = ["."]
-venvPath = "."
-venv = ".venv"
 typeCheckingMode = "standard"
 exclude = ["typings"]
 
