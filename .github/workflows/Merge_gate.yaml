@@ -118,20 +118,22 @@ jobs:
         run: |
           source .venv-ci/bin/activate
 
-          # Ensure the required stub was committed, not just generated in CI.
+          # The extension stub must be included in the commit.
           git ls-files --error-unmatch lj_hmc/_core.pyi
 
           python tools/gen_stubs.py
+          test -s lj_hmc/_core.pyi
 
-          if ! git diff --exit-code -- "*.pyi"; then
+          # Check only project-package stubs, not installed dependencies.
+          if ! git diff --exit-code -- "lj_hmc/*.pyi"; then
             echo "::error::Generated stubs differ from the committed versions."
             echo "Run the local merge gate, review the stubs, and commit them."
             exit 1
           fi
 
-          untracked=$(git ls-files --others --exclude-standard -- "*.pyi")
+          untracked=$(git ls-files --others --exclude-standard -- "lj_hmc/*.pyi")
           if [[ -n "$untracked" ]]; then
-            echo "::error::Stub generation produced untracked files."
+            echo "::error::Untracked type stubs found in lj_hmc."
             printf '%s\n' "$untracked"
             exit 1
           fi
