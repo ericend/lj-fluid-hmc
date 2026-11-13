@@ -21,7 +21,6 @@ for folder in (DATA_DIR, PLOTS_DIR):
 
 
 def main() -> None:
-
     # user input
     input = sys.SIInput(
         seed=42
@@ -31,7 +30,7 @@ def main() -> None:
     pos, L_red, _ = sim_params.build_fcc_lattice(jiggle=0.04)
     inputs, derived = sim_params.to_dict()
 
-    with h5py.File(DATA_DIR / "run.hdf5", "x") as f:  # pyright: ignore[reportAttributeAccessIssue]
+    with h5py.File(DATA_DIR / "run.hdf5", "x") as f:
         f.attrs["schema_version"] = 1
         f.create_group("inputs").attrs.update(inputs)
         f.create_group("derived").attrs.update(derived)

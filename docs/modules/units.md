@@ -80,7 +80,7 @@ Setting up a run:
 ```python
 inputs = SIInput(temperature=90.0, mass_density=1374.0, n_cells=4)
 units = LJUnits(inputs)
-sim = HMC(units.reduced)   # physics sees reduced values only
+sim = HMC(units.reduced)  # physics sees reduced values only
 ```
 
 During a run:
@@ -96,7 +96,7 @@ Saving:
 
 ```python
 attrs = {k: v for k, v in asdict(inputs).items() if v is not None}
-f.attrs.update(attrs)      # reduced datasets go under /history
+f.attrs.update(attrs)  # reduced datasets go under /history
 ```
 
 Analysis:

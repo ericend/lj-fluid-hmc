@@ -19,9 +19,15 @@ testpaths = ["tests"]
 
 [tool.pyright]
 extraPaths = ["."]
-venvPath = "."
-venv = ".venv"
-typeCheckingMode = "default"
+typeCheckingMode = "standard"
+exclude = ["typings"]
+
+[tool.ruff]
+extend-exclude = [
+    "typings",
+    ".venv-gate",
+    "lj_hmc/_core.pyi",
+]
 
 [tool.ruff.lint]
 extend-select = ["ANN"]

@@ -47,6 +47,13 @@ $$.
 
 ### 
 
+## Development
+
+See [Getting Started](docs/GETTING_STARTED.md) for full setup instructions. In short:
+
+- **Pre-commit hooks** — Ruff formatting and linting run automatically on every `git commit`.
+- **CI** — every PR is gated on Python lint, type-checking (Pyright), Rust lint (Clippy + fmt), and the full test suite.
+
 ## Implementation:
 
 ### Software Design
