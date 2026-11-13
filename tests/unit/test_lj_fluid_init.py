@@ -4,8 +4,8 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 
-from lj_hmc import lj_fluid_init
-from lj_hmc.lj_fluid_init import AVOGADRO, init_fcc
+from modules.system_init import FCC_lattice_init
+from modules.system_init.FCC_lattice_init import AVOGADRO, init_fcc
 
 # Standard argon values
 A_DENSITY = 1.374  # g/cm^3, liquid argon ~90 K
@@ -214,6 +214,8 @@ def test_small_jiggle_creates_no_overlaps() -> None:
 
 # ---------- internal consistency check ----------
 def test_density_mismatch_raises_runtime_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(lj_fluid_init, "ANGSTROM3_PER_CM3", 1e23)  # wrong unit factor
+    monkeypatch.setattr(
+        FCC_lattice_init, "ANGSTROM3_PER_CM3", 1e23
+    )  # wrong unit factor
     with pytest.raises(RuntimeError, match="Reduced density mismatch"):
         make(32)

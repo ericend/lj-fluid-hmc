@@ -8,8 +8,7 @@ __pycache__/
 .mypy_cache/
 
 # Data / simulation outputs
-*.h5
-*.hdf5
+results/
 
 # Rust build artefacts
 engine/target/

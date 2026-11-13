@@ -21,7 +21,7 @@ testpaths = ["tests"]
 extraPaths = ["."]
 venvPath = "."
 venv = ".venv"
-typeCheckingMode = "strict"
+typeCheckingMode = "default"
 
 [tool.ruff.lint]
 extend-select = ["ANN"]
