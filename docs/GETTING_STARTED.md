@@ -29,6 +29,7 @@ python -m venv .venv
 
 python -m pip install -r requirements.txt
 maturin develop
+pre-commit install
 pytest -rs
 ```
 
@@ -45,13 +46,41 @@ Use `maturin develop --release` for benchmarking.
 
 ---
 
+## Pre-commit hooks
+
+`pre-commit install` (in Setup above) activates automatic **Ruff formatting and
+linting** on every `git commit`. If a hook reformats a file, the commit is
+aborted — review the changes, `git add`, and commit again.
+
+To run the hooks manually on all files:
+
+```bash
+pre-commit run --all-files
+```
+
+---
+
+## CI
+
+Every pull request and push to `main` triggers the merge-gate workflow
+(`.github/workflows/merge_gate.yaml`). All four jobs must pass before merging:
+
+| Job | What it checks |
+|-----|----------------|
+| **lint-python** | `ruff format --check` + `ruff check` |
+| **typecheck** | `pyright` |
+| **lint-rust** | `cargo fmt --check` + `clippy -D warnings` |
+| **build-test** | `maturin develop` → `cargo test` → `pytest` → stub freshness |
+
+---
+
 ## Daily workflow
 
 | You changed | Run |
 |-------------|-----|
 | Python code | nothing (editable install) |
 | Rust code, `Cargo.toml`, `pyproject.toml` | `maturin develop` |
-| Rust API | `maturin develop`, then `python gen_stubs.py` |
+| Rust API | `maturin develop`, then `python tools/gen_stubs.py` |
 | Anything | `pytest -rs`, `ruff check`, `pyright` |
 
 ---

@@ -1,0 +1,96 @@
+# .github/workflows/merge_gate.yaml
+name: Merge gate
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PYTHON_VERSION: "3.12"
+  CARGO_TERM_COLOR: always
+
+jobs:
+  # ── 1. Python lint ─────────────────────────────────
+  lint-python:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install ruff
+      - run: ruff format --check .
+      - run: ruff check .
+
+  # ── 2. Python type check ───────────────────────────
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install numpy h5py matplotlib pyright
+      - run: pyright
+
+  # ── 3. Rust lint ───────────────────────────────────
+  lint-rust:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy, rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: engine
+      - run: cargo fmt --manifest-path engine/Cargo.toml -- --check
+      - run: cargo clippy --manifest-path engine/Cargo.toml -- -D warnings
+
+  # ── 4. Build extension & run all tests ─────────────
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: engine
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+      - run: pip install maturin pytest numpy h5py matplotlib
+      - name: Build Rust extension (debug)
+        run: maturin develop --manifest-path engine/Cargo.toml
+      - name: Rust tests
+        run: cargo test --manifest-path engine/Cargo.toml
+      - name: Python tests
+        run: pytest tests/ -v --tb=short
+      - name: Check stubs are up-to-date
+        run: |
+          python tools/gen_stubs.py
+          git diff --exit-code -- "*.pyi" || {
+            echo "::error::Stubs are out of date. Run 'python tools/gen_stubs.py' and commit the result."
+            exit 1
+          }
+
+  # ── 5. Merge gate ──────────────────────────────────
+  gate:
+    if: always()
+    needs: [lint-python, typecheck, lint-rust, build-test]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check upstream jobs
+        run: |
+          if [[ "${{ needs.lint-python.result }}" != "success" ||
+                "${{ needs.typecheck.result }}" != "success" ||
+                "${{ needs.lint-rust.result }}" != "success" ||
+                "${{ needs.build-test.result }}" != "success" ]]; then
+            echo "One or more jobs failed"
+            exit 1
+          fi

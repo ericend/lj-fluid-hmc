@@ -23,5 +23,8 @@ venvPath = "."
 venv = ".venv"
 typeCheckingMode = "default"
 
+[tool.ruff]
+extend-exclude = ["typings"]
+
 [tool.ruff.lint]
 extend-select = ["ANN"]
