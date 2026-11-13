@@ -7,7 +7,8 @@ Groups work like dictionaries, datasets work like NumPy arrays.
 ```python
 import h5py, numpy as np
 
-with h5py.File("run.h5", "r") as f: ...   # context manager closes the file
+with h5py.File("run.h5", "r") as f:
+    ...  # context manager closes the file
 ```
 
 | Mode | Meaning |
@@ -22,12 +23,14 @@ with h5py.File("run.h5", "r") as f: ...   # context manager closes the file
 
 ```python
 grp = f.create_group("history")
-d = f.create_dataset("history/T", ...)   # missing intermediate groups are created
-f["history/T"]                           # retrieve by path
-"history/T" in f                         # membership test, full paths work
-list(f.keys()); f.items(); f.get("x")    # dictionary-style access
-f.visit(print)                           # recursive walk over all names
-f.visititems(func)                       # same, func(name, obj)
+d = f.create_dataset("history/T", ...)  # missing intermediate groups are created
+f["history/T"]  # retrieve by path
+"history/T" in f  # membership test, full paths work
+list(f.keys())
+f.items()
+f.get("x")  # dictionary-style access
+f.visit(print)  # recursive walk over all names
+f.visititems(func)  # same, func(name, obj)
 ```
 
 Iterating over a group yields only its direct members. Use `visit` or `visititems` to walk the whole file.
@@ -35,13 +38,13 @@ Iterating over a group yields only its direct members. Use `visit` or `visititem
 ## Datasets
 
 ```python
-f.create_dataset("T", data=arr)                    # from an existing array
-f.create_dataset("T", shape=(100,), dtype="f8")    # empty, fill later
+f.create_dataset("T", data=arr)  # from an existing array
+f.create_dataset("T", shape=(100,), dtype="f8")  # empty, fill later
 d = f["T"]
-d.shape, d.dtype                                   # inspect without loading data
-d[...]        # everything as a NumPy array
-d[0]          # single element
-d[0:100:10]   # slice, reads only these values
+d.shape, d.dtype  # inspect without loading data
+d[...]  # everything as a NumPy array
+d[0]  # single element
+d[0:100:10]  # slice, reads only these values
 d[...] = arr  # write (file must be open for writing)
 ```
 
@@ -64,7 +67,7 @@ dict(grp.attrs)
 
 ```python
 f.create_dataset("T", data=arr, compression="gzip", compression_opts=4)
-f.create_dataset("T", shape=(0,), maxshape=(None,), dtype="f8")   # growable
+f.create_dataset("T", shape=(0,), maxshape=(None,), dtype="f8")  # growable
 f["T"].resize((n_new,))
 f.flush()
 ```
@@ -107,20 +110,23 @@ n = sim_params.n_particles
 
 with h5py.File(DATA_DIR / "run.h5", "x") as f:
     f.attrs["schema_version"] = 1
-    for group, values in sim_params.to_dict().items():       # /inputs, /derived
+    for group, values in sim_params.to_dict().items():  # /inputs, /derived
         f.create_group(group).attrs.update(values)
 
-    f.create_dataset("initial/positions", data=pos0)         # (N, 3)
+    f.create_dataset("initial/positions", data=pos0)  # (N, 3)
 
     traj = f.create_dataset(
         "trajectory/positions",
-        shape=(0, n, 3), maxshape=(None, n, 3),
-        chunks=(100, n, 3), dtype="f8",
+        shape=(0, n, 3),
+        maxshape=(None, n, 3),
+        chunks=(100, n, 3),
+        dtype="f8",
     )
     names = ("T", "U", "K", "P")
     obs = {
-        k: f.create_dataset(f"observables/{k}", shape=(0,),
-                            maxshape=(None,), chunks=(1000,), dtype="f8")
+        k: f.create_dataset(
+            f"observables/{k}", shape=(0,), maxshape=(None,), chunks=(1000,), dtype="f8"
+        )
         for k in names
     }
 
@@ -152,8 +158,8 @@ with h5py.File(path, "r") as f:
 
     pos0 = f["initial/positions"][...]
     traj = f["trajectory/positions"]
-    production = traj[sim_params.n_eq:]          # loads only this part
-    T = f["observables/T"][sim_params.n_eq:]
+    production = traj[sim_params.n_eq :]  # loads only this part
+    T = f["observables/T"][sim_params.n_eq :]
 ```
 
 Sources: [h5py Quick Start](https://docs.h5py.org/en/stable/quick.html), [h5py Datasets](https://docs.h5py.org/en/stable/high/dataset.html), [HDF5 chunking and performance](https://support.hdfgroup.org/documentation/hdf5/latest/improve_compressed_perf.html)
