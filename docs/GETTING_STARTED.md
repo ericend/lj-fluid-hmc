@@ -1,8 +1,8 @@
 # Getting Started
+> This guide was partly AI-generated.
 
 > **SI2530 / FSI3080 HT26 — Hybrid Monte Carlo for a Lennard-Jones Fluid**
 > KTH Computational Physics | Eric Enderborg
-
 ---
 
 ## Prerequisites
