@@ -108,4 +108,3 @@ def test_velocity_backwards() -> None:
     assert v[0] == pytest.approx(1.0)
     assert v[1] == pytest.approx(0.0)
     assert v[2] == pytest.approx(-4.0)
-
