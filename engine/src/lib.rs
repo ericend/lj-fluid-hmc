@@ -1,9 +1,9 @@
 use pyo3::exceptions::PyValueError;
 use pyo3::prelude::*;
-use rand::thread_rng;
-use rand_distr::{Distribution, Normal};
+// use rand::thread_rng;
+// use rand_distr::{Distribution, Normal};
 
-const K_B: f64 = 1.380649e-23;
+// const K_B: f64 = 1.380649e-23;
 
 /// ## Compute the Lennard-Jones pair potential for a displacement vector.
 ///
@@ -63,10 +63,10 @@ pub fn kinetic_energy(v: [f64; 3], m: f64) -> PyResult<f64> {
 // Maxwell drawer
 // Draws a velocity from the Maxwell-Boltzmann dsitribution for a particle
 //
-#[pyfunction]
-pub fn sample_maxwell_vel(temp: f64, mass: f64) -> f64 {
-    let std_dev = (K_B * temp / mass).sqrt();
-}
+//#[pyfunction]
+//pub fn sample_maxwell_vel(temp: f64, mass: f64) -> f64 {
+//    let std_dev = (K_B * temp / mass).sqrt();
+//}
 
 #[pymodule]
 fn _core(m: &Bound<'_, PyModule>) -> PyResult<()> {
