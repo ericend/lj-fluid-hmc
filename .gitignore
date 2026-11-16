@@ -22,3 +22,7 @@ dist/
 # IDE
 .vscode/*.pdb
 .ruff_cache/
+
+# Local notes / task guides
+TODO.md
+
