@@ -116,7 +116,10 @@ Save the example in the repository root and run it using the activated developme
 | maturin cannot find `lj_hmc` | Check the package directory and `python-source` in `pyproject.toml`; it must not point to a virtual environment. |
 | VS Code selects the wrong Python | Select the repository's `.venv` interpreter. Check any explicit Pyright venv settings too. |
 | Engine tests are skipped | Verify the extension import directly and inspect `pytest -rs` output. |
+| `STATUS_DLL_NOT_FOUND (0xc0000135)` | Add the base Python directory to your Git Bash PATH: `export PATH="/c/Users/<user>/AppData/Local/Programs/Python/Python312:$PATH"` (see [Rust Cheat-Sheet](rust_cheatsheet.md)). |
 
 ## Next steps
 
-For development checks, Rust API changes, generated stubs, and the before-push workflow, see [Contributing](CONTRIBUTING.md).
+- For daily compilation, testing, and benchmark builds, see the **[Rust Cheat-Sheet](rust_cheatsheet.md)**.
+- For local merge gate checks, code style, and pre-push requirements, see **[Contributing](CONTRIBUTING.md)**.
+- For theoretical background and algorithm steps, see **[Notes](NOTES.md)**.

@@ -128,12 +128,13 @@ If generation introduces formatting differences, fix the generator rather than r
 
 ## Adding Rust functions
 
-1. Implement the function in `engine/src/lib.rs` with `#[pyfunction]`.
-2. Register it in the PyO3 `_core` module.
-3. Add or update tests.
-4. Run the full gate.
-5. Review the generated stub and commit it with the source changes.
-6. Rerun the full gate before pushing.
+1. Implement the function in the appropriate submodule under `engine/src/` (e.g., `potential.rs`, `pbc.rs`, `math.rs`, or a new module).
+2. Register and re-export it in `engine/src/lib.rs` inside the PyO3 `_core` module.
+3. Add unit tests at the bottom of the `.rs` file in `#[cfg(test)] mod tests`.
+4. Run `cargo test` and `maturin develop`.
+5. Run `python tools/gen_stubs.py` to regenerate `lj_hmc/_core.pyi`.
+6. Add or update integration tests in `tests/unit/test_engine.py`.
+7. Run the full merge gate (`bash tools/scripts/merge_gate.sh`).
 
 Keep the extension name consistent across:
 
@@ -145,10 +146,15 @@ Keep the extension name consistent across:
 
 ```text
 lj-fluid-hmc/
+├── Cargo.toml (root workspace)
 ├── pyproject.toml
 ├── engine/
 │   ├── Cargo.toml
-│   └── src/lib.rs
+│   └── src/
+│       ├── lib.rs
+│       ├── potential.rs
+│       ├── pbc.rs
+│       └── math.rs
 ├── lj_hmc/
 │   ├── __init__.py
 │   └── _core.pyi

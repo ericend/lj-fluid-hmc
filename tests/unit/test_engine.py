@@ -75,3 +75,37 @@ def test_nonpositive_sigma_raises_value_error(sigma: float) -> None:
             epsilon=1.0,
             sigma=sigma,
         )
+
+
+def test_kinetic_energy() -> None:
+    ke = engine.kinetic_energy([1.0, 2.0, 2.0], 2.0)
+    assert ke == pytest.approx(9.0)
+
+
+def test_kinetic_energy_negative_mass() -> None:
+    with pytest.raises(ValueError):
+        engine.kinetic_energy([1.0, 0.0, 0.0], -1.0)
+
+
+def test_minimum_image() -> None:
+    dr = [9.0, -9.0, 5.1]
+    res = engine.minimum_image(dr, 10.0)
+    assert res[0] == pytest.approx(-1.0)
+    assert res[1] == pytest.approx(1.0)
+    assert res[2] == pytest.approx(-4.9)
+
+
+def test_wrap_pbc() -> None:
+    r = [11.5, -2.5, 0.0]
+    res = engine.wrap_pbc(r, 10.0)
+    assert res[0] == pytest.approx(1.5)
+    assert res[1] == pytest.approx(7.5)
+    assert res[2] == pytest.approx(0.0)
+
+
+def test_velocity_backwards() -> None:
+    v = engine.velocity_backwards([1.0, 2.0, 3.0], [1.5, 2.0, 1.0], 0.5)
+    assert v[0] == pytest.approx(1.0)
+    assert v[1] == pytest.approx(0.0)
+    assert v[2] == pytest.approx(-4.0)
+

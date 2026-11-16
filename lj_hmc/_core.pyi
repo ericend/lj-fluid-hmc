@@ -7,34 +7,37 @@ from typing import Any
 
 def kinetic_energy(v, m):
     """
-    Kinetic Energy
-    Calculate the kinetic energy of a particle in 3D-space
-    where `v` is the velocity vector.
-    ## Panics
-
-    Panics if the mass `m` is zero.
-
-    ## Examples
+    Calculate the kinetic energy of a particle with velocity vector `v` and mass `m`.
     """
     ...
 
 def lennard_jones(r, epsilon, sigma):
     """
-    ## Compute the Lennard-Jones pair potential for a displacement vector.
+    Compute the Lennard-Jones pair potential for a displacement vector.
 
-    Evaluates `U(R) = 4 * epsilon * ((sigma / R)^12 - (sigma / R)^6)`
-    where `R` is the Euclidean norm of `r`.
+    Evaluates:
+        U(r) = 4 * epsilon * ((sigma / r)^12 - (sigma / r)^6)
+    where `r` is the Euclidean norm of the displacement vector.
+    """
+    ...
 
-    ## Panics
+def minimum_image(dr, box_length):
+    """
+    Apply the minimum image convention to a displacement vector `dr` in a cubic box of size `box_length`.
 
-    Panics if the computed squared separation is zero (i.e. `r` is empty
-    or all its components are zero).
+    Fold:
+        dr_alpha = dr_alpha - L * round(dr_alpha / L)
+    """
+    ...
 
-    ## Examples
+def velocity_backwards(r_prev, r_curr, dt):
+    """
+    Estimate velocity from backward difference: (r_curr - r_prev) / dt.
+    """
+    ...
 
-    ```
-    # use engine::lennard_jones;
-    assert_eq!(lennard_jones([1.0, 0.0, 0.0], 1.0, 1.0), 0.0);
-    ```
+def wrap_pbc(r, box_length):
+    """
+    Wrap a coordinate vector `r` back into the primary cubic simulation cell `[0, box_length)`.
     """
     ...

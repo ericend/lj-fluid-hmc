@@ -1,12 +1,9 @@
 # Hybrid Monte Carlo simulation for a Lennard-Jones fluid
 **SI2530 / FSI3080 HT26 Computational Physics** | KTH | Eric Enderborg | November 2026
 
-> This README was partly AI-generated.
+## Project Description
 
-## Project Description:
-
-
-This project aims to first implement a standard Metropolis Monte Carlo program to simulate a Lennard-Jones fluid (argon) in the canonical ($NVT$) ensemble, and subsequently expand upon it by implementing Hybrid (Hamiltonian) Monte Carlo (HMC) updates to compare sampling efficiency and autocorrelation times.
+This project implements a standard Metropolis Monte Carlo program to simulate a Lennard-Jones fluid (argon) in the canonical ($NVT$) ensemble, and expands upon it by implementing Hybrid (Hamiltonian) Monte Carlo (HMC) updates to compare sampling efficiency and autocorrelation times.
 
 <details>
 <summary>Original Assignment</summary>
@@ -35,78 +32,64 @@ criterion. (See e.g., Frenkel-Smit). Make sure you can reproduce the results of 
 lab and, in addition, compute the autocorrelation time to quantitatively compare with
 Metropolis MC
 
-
 </details>
 
+---
 
-## Tech Stack
+## Documentation Quick Links
 
-### Rust kernel
-The physics kernel is written in Rust and exposed to Python via PyO3.
+- **[Getting Started](docs/GETTING_STARTED.md)** — Environment setup, building the extension, and verification.
+- **[Rust & PyO3 Cheat-Sheet](docs/rust_cheatsheet.md)** — Daily commands for building, testing (`cargo test`), and stub generation.
+- **[Theory & Algorithm Notes](docs/NOTES.md)** — Statistical mechanics fundamentals, Metropolis walk, Velocity Verlet, and HMC steps.
+- **[Data Storage Reference](docs/h5py_cheatsheet.md)** — Reading and writing simulation data with `h5py`.
+- **[Contributing & CI](docs/CONTRIBUTING.md)** — Local merge-gate script, testing standards, and type stubs.
 
-### Python
-Python serves as the simulation frontend, handling experiment configuration, analysis, and visualization.
+---
 
-## Model:
+## Physical Model
 
-### Lennard-Jones fluid
-A Lennard-Jones fluid refers to the macroscopic N-particle system whose potential energy is modeled as the sum of these pairwise interactions:
+### Lennard-Jones Potential
+The macroscopic $N$-particle system interacts via pairwise Lennard-Jones interactions:
+
 $$
-U(\mathbf{r}^N) = \sum _{i<j} ^N u^{Lj}(r_{ij})
+U(\mathbf{r}^N) = \sum_{i<j}^N u(r_{ij})
 $$
-where $\mathbf{r}$ is the displacement vector (dx, dy, dz).
 
-The Lennard-Jones potential is given by:
+where $r_{ij} = |\mathbf{r}_j - \mathbf{r}_i|$ subject to periodic boundary conditions (minimum image convention). The pair potential is:
+
 $$
-u^{Lj}(r)=4 \epsilon \left[  \left( \frac{\sigma}{r} \right)^{12} - \left( \frac{\sigma}{r} \right) ^6 \right]
-$$.
-* Short Range Repulsion: $\propto r^{-12}$ models the electrostatic repulsion between overlapping electron clouds (Pauli principle) when two atoms get very close.
-* Long Range Attraction: $\propto r^{-6}$ Models van der Waals interaction caused by dipole-induced fluctuations.
-* Energy Scale: $\epsilon$ represents the potential well depth (strength of the interaction)
-* Lenght Scale: $\sigma$ Represents the effective core size of the atom where $u^{Lj}(\sigma) = 0$
-* It is effectively the standard model of liquid state physics.
-* It captures real phase transitions.
-* It succeeds particularly well for noble gasses such as argon.
+u(r) = 4\epsilon \left[ \left(\frac{\sigma}{r}\right)^{12} - \left(\frac{\sigma}{r}\right)^6 \right]
+$$
 
+- **Short-range repulsion:** $\propto r^{-12}$ models Pauli exclusion when electron clouds overlap.
+- **Long-range attraction:** $\propto r^{-6}$ models attractive London dispersion (induced dipole-dipole fluctuations).
+- **Energy scale ($\epsilon$):** Well depth / interaction strength.
+- **Length scale ($\sigma$):** Effective atomic collision diameter where $u(\sigma) = 0$.
 
-### Velocity Verlet Integrator
+### Reduced Units
+All internal simulation kernels operate in dimensionless reduced Lennard-Jones units:
 
-### Markov Chain Monte Carlo (MCMC)
+| Quantity | Reduced Unit | Definition |
+| :--- | :---: | :--- |
+| **Length** | $r^*$ | $r / \sigma$ |
+| **Energy** | $E^*$ | $E / \epsilon$ |
+| **Temperature** | $T^*$ | $k_B T / \epsilon$ |
+| **Time** | $t^*$ | $t / (\sigma\sqrt{m/\epsilon})$ |
+| **Density** | $\rho^*$ | $N \sigma^3 / V$ |
+| **Pressure** | $P^*$ | $P \sigma^3 / \epsilon$ |
+| **Force** | $F^*$ | $F \sigma / \epsilon$ |
 
-### Metropolis Monte Carlo
+---
 
-### Hybrid Monte Carlo (HMC)
+## Software Architecture
 
-### NUTS (No U-turn Sampler) (maybe?)
+The codebase follows a **two-layer hybrid architecture** that decouples high-performance numerical routines from experiment orchestration:
 
-## Development
+1. **Physics Kernel (`engine/`):** Written in Rust and compiled as a native Python extension (`lj_hmc._core`) using **PyO3** and **Maturin**. It executes pairwise distance evaluations under minimum image convention, fast $\mathcal{O}(N)$ local energy changes, and symplectic integration without Python interpreter overhead.
+2. **Orchestration Layer (`modules/`):** Manages parameter configuration, FCC lattice initialization, SI $\leftrightarrow$ reduced unit conversions (`SimulationParams`), and Monte Carlo Markov chains.
+3. **Analysis Layer (`analysis/`):** Computes thermodynamic observables, block averaging error estimates, autocorrelation times, and publication plots.
 
-See [Getting Started](docs/GETTING_STARTED.md) for full setup instructions. In short:
-
-- **CI** — every PR is gated on Python lint, type-checking (Pyright), Rust lint (Clippy + fmt), and the full test suite.
-
-## Implementation:
-
-### Software Design
-
-
-The codebase follows a **two-layer hybrid architecture** that decouples low-level numerical integration from high-level experiment orchestration:
-
-1. **Physics Kernel (`rust/`):** Compiled as a native Python extension using **PyO3** and **Maturin**. It owns the simulation state (particle positions, forces, and simulation box parameters) and executes the tight inner loops—pairwise Lennard-Jones force/energy evaluations, minimum-image periodic boundary conditions, Velocity Verlet integration, and Metropolis/HMC acceptance steps—without Python interpreter overhead.
-2. **Orchestration & Analysis Layer (`python/`):** Manages simulation initialization, parameter sweeps, observable logging (potential/kinetic energy, virial pressure, acceptance ratios), integrated autocorrelation time ($\tau_{\text{int}}$) estimation, and plotting.
-
-#### Key Design Choices
-* **Reduced Lennard-Jones Units:** Internal kernel calculations operate in dimensionless reduced units.
-* **Reproducible PRNG:** Uses a seedable, deterministic random number generator (`rand` crate) inside the Rust kernel so Monte Carlo trajectories and benchmark runs are strictly reproducible.
-
-## Analysis:
-
-### Verification against previous simulation
-(Argon lab)
-
-## Results
-
-### Recreation of results
-
-### Algorithm Benchmarks
-
+### Key Design Choices
+- **Dimensionless Core:** All physics computations occur in reduced units; conversion to SI happens at the user boundaries (`modules/system_init/system.py`).
+- **Workspace Tooling:** Rust engine managed via root Cargo workspace (`Cargo.toml`) for direct `cargo test` and `cargo clippy` calls.
+- **Strict Quality Gate:** All changes pass Python linting/formatting (Ruff), type checking (Pyright), Rust linting (Clippy + rustfmt), and automated tests.
