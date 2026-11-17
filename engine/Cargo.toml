@@ -1,14 +1,15 @@
 [package]
-name = "engine"
+name = "lj-kernel"
 version = "0.1.0"
 edition = "2021"
-description = "High-performance physics kernels for the LJ-HMC simulation (PyO3 extension)"
+description = "High-performance physics kernels for a LJ-(H)MC simulation (PyO3 extension)"
 
 [lib]
 name = "_core"
-crate-type = ["cdylib"]
+crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 pyo3 = { version = "0.30", features = ["extension-module"] }
-
+rand = "0.9"
+rand_chacha = "0.9"
 

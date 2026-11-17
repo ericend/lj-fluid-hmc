@@ -88,6 +88,7 @@ The codebase follows a **two-layer hybrid architecture** that decouples high-per
 1. **Physics Kernel (`engine/`):** Written in Rust and compiled as a native Python extension (`lj_hmc._core`) using **PyO3** and **Maturin**. It executes pairwise distance evaluations under minimum image convention, fast $\mathcal{O}(N)$ local energy changes, and symplectic integration without Python interpreter overhead.
 2. **Orchestration Layer (`modules/`):** Manages parameter configuration, FCC lattice initialization, SI $\leftrightarrow$ reduced unit conversions (`SimulationParams`), and Monte Carlo Markov chains.
 3. **Analysis Layer (`analysis/`):** Computes thermodynamic observables, block averaging error estimates, autocorrelation times, and publication plots.
+4. The kernel use ChaCha8Rng for reproducible results.
 
 ### Key Design Choices
 - **Dimensionless Core:** All physics computations occur in reduced units; conversion to SI happens at the user boundaries (`modules/system_init/system.py`).

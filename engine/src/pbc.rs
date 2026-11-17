@@ -5,6 +5,10 @@ use pyo3::prelude::*;
 
 /// Apply the minimum image convention to a displacement vector `dr` in a cubic box of size `box_length`.
 ///
+/// **Frenkel & Smit (2002), Understanding Molecular Simulation (2nd ed.):**
+/// > *"In order to simulate bulk phases it is essential to choose boundary conditions
+///  that mimic the presence of an infinite bulk surrounding our N-particle model system."*
+///
 /// Fold:
 ///     dr_alpha = dr_alpha - L * round(dr_alpha / L)
 #[pyfunction]
