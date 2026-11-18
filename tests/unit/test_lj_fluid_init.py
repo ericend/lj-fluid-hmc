@@ -4,8 +4,7 @@ import numpy as np
 import numpy.typing as npt
 import pytest
 
-from modules.system_init import FCC_lattice_init
-from modules.system_init.FCC_lattice_init import AVOGADRO, init_fcc
+from modules.system_init.lattice import fcc
 
 # Standard argon values
 A_DENSITY = 1.374  # g/cm^3, liquid argon ~90 K
@@ -23,7 +22,7 @@ def make(
         "sigma": A_SIGMA,
     }
     params.update(kwargs)
-    return init_fcc(N, **params)
+    return fcc(N, **params)
 
 
 def min_image(diff: npt.NDArray[np.float64], L: float) -> npt.NDArray[np.float64]:
@@ -214,8 +213,6 @@ def test_small_jiggle_creates_no_overlaps() -> None:
 
 # ---------- internal consistency check ----------
 def test_density_mismatch_raises_runtime_error(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setattr(
-        FCC_lattice_init, "ANGSTROM3_PER_CM3", 1e23
-    )  # wrong unit factor
+    monkeypatch.setattr(lattice, "ANGSTROM3_PER_CM3", 1e23)  # wrong unit factor
     with pytest.raises(RuntimeError, match="Reduced density mismatch"):
         make(32)

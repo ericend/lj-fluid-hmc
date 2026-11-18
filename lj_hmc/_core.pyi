@@ -7,7 +7,58 @@ from typing import Any
 
 def init_fcc(n_particles, density, molar_mass, sigma, jiggle=0.0, seed=None):
     """
-    Python-facing wrapper exposed as `init_fcc` in the module.
+    Initialize a Lennard-Jones fluid on an FCC lattice from physical density.
+
+    `n_particles` particles are placed on a face-centred-cubic lattice that
+    fills a cubic periodic box whose volume reproduces the requested mass
+    density. An optional random displacement breaks the lattice symmetry.
+    With `jiggle = 0.0` the lattice is perfect.
+
+    # Arguments
+
+    * `n_particles` - Must equal `4 * n^3` for integer `n` (32, 108, 256,
+      500, 864, ...).
+    * `density` - Target mass density in g/cm³ (e.g. 1.374 for liquid argon).
+    * `molar_mass` - Molar mass in g/mol (e.g. 39.948 for argon).
+    * `sigma` - Lennard-Jones sigma in Å (e.g. 3.405 for argon). Returned
+      positions are in multiples of this length.
+    * `jiggle` - Maximum random displacement per coordinate, as a fraction of
+      the cubic cell edge `a = L / n`. Each coordinate is shifted by an
+      independent uniform number in `[-jiggle * a, +jiggle * a]`.
+    * `rng` - Seedable RNG used for the jiggle. Pass a `ChaCha8Rng` created
+      with `seed_from_u64` for reproducibility. Has no effect if
+      `jiggle == 0`.
+
+    # Returns
+
+    `(positions, box_length_reduced, box_length_angstrom)`, where `positions`
+    are in reduced units, wrapped into `[0, box_length_reduced)`.
+
+    # Errors
+
+    * [`InitError::InvalidInput`] if any physical input is non-positive.
+    * [`InitError::InvalidCount`] if `n_particles` is not `4 * n^3`.
+    * [`InitError::DensityMismatch`] if the final reduced density does not
+      match the closed-form value (sanity check against unit mistakes).
+
+    # Notes
+
+    The reduced number density is
+    `rho* = N * sigma^3 / V = density * N_A * sigma^3 / molar_mass`.
+    The nearest-neighbour distance is `a / sqrt(2)` (12 neighbours per atom).
+    A perfect lattice has zero net force on every atom by symmetry.
+
+    # Example
+
+    ```ignore
+    use rand_chacha::ChaCha8Rng;
+    use rand::SeedableRng;
+
+    let mut rng = ChaCha8Rng::seed_from_u64(42);
+    let (pos, l_red, l_a) = init_fcc(256, 1.396, 39.948, 3.405, 0.0, &mut rng).unwrap();
+    assert_eq!(pos.len(), 256);
+    assert_eq!((l_a * 10.0).round() / 10.0, 23.0);
+    ```
     """
     ...
 
