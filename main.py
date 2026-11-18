@@ -6,6 +6,7 @@ import h5py
 
 import modules.system_init.system as sys
 from analysis.plotting import plot_positions_3d
+from modules.system_init import lattice
 
 # endregion
 
@@ -21,25 +22,23 @@ for folder in (DATA_DIR, PLOTS_DIR):
 
 
 def main() -> None:
-    # user input
-    input = sys.SIInput(
-        seed=42
-    )  # use std values for now with fixed seed for replicability
-
-    sim_params = sys.SimulationParams(input)
-    pos, L_red, _ = sim_params.build_fcc_lattice(jiggle=0.04)
-    inputs, derived = sim_params.to_dict()
-
+    # user input in SI units
+    input = sys.SIInput(seed=42)
+    parameters = sys.SimulationParameters(input)
+    inputs, derived = parameters.to_dict()
+    start_positions = lattice.fcc(parameters=parameters)
     with h5py.File(DATA_DIR / "run.hdf5", "x") as f:
         f.attrs["schema_version"] = 1
         f.create_group("inputs").attrs.update(inputs)
         f.create_group("derived").attrs.update(derived)
-        f.create_dataset("positions/initial", data=pos)
+        f.create_dataset("positions/initial", data=start_positions)
 
     print(f"Stamp: {STAMP}")
-    print(sim_params.print_parameters())
+    print(parameters.print_parameters())
 
-    fig, _ = plot_positions_3d(pos, L_red, axis_label=r"$\sigma$", view="010")
+    fig, _ = plot_positions_3d(
+        start_positions, parameters.l_box_red, axis_label=r"$\sigma$", view="010"
+    )
     fig.savefig(PLOTS_DIR / "positions_yview_jiggle.png")
 
 

@@ -9,8 +9,18 @@ use pyo3::prelude::*;
 /// > *"In order to simulate bulk phases it is essential to choose boundary conditions
 ///  that mimic the presence of an infinite bulk surrounding our N-particle model system."*
 ///
-/// Fold:
-///     dr_alpha = dr_alpha - L * round(dr_alpha / L)
+///
+/// dX = X_i - X_j
+/// dY = Y_i - Y_j
+/// dZ = Z_i - Z_j
+/// # minimum image, per component
+/// dX -= box * np.round(dX / box)
+/// dY -= box * np.round(dY / box)
+/// dZ -= box * np.round(dZ / box)
+/// # compute the distance
+/// dR = np.sqrt(dX**2 + dY**2 + dZ**2)
+///
+
 #[pyfunction]
 #[pyo3(signature = (dr, box_length))]
 pub fn minimum_image(dr: [f64; 3], box_length: f64) -> PyResult<[f64; 3]> {
