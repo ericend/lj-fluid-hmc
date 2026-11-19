@@ -1,43 +1,27 @@
 //! Potential energy and kinetic energy calculations.
 
-use pyo3::exceptions::PyValueError;
-use pyo3::prelude::*;
-
-/// Compute the Lennard-Jones pair potential for a displacement vector.
+/// Compute the unitless Lennard-Jones pair potential for
+/// the square of some interatomic distance r* dr2, i.e dr2 = (r*)^2.
 ///
 /// Evaluates:
-///     U(r) = 4 * epsilon * ((sigma / r)^12 - (sigma / r)^6)
-/// where `r` is the Euclidean norm of the displacement vector.
-#[pyfunction]
-#[pyo3(signature = (r, epsilon, sigma))]
-pub fn lennard_jones(r: Vec<f64>, epsilon: f64, sigma: f64) -> PyResult<f64> {
-    if epsilon <= 0.0 {
-        return Err(PyValueError::new_err("Epsilon must be positive"));
-    }
-    if sigma <= 0.0 {
-        return Err(PyValueError::new_err("Sigma must be positive"));
+///     U(r*) = 4(/r*)^12 - (/r*)^6)
+/// where `r*` is the Euclidean norm of the displacement vector in reduced units.
+pub fn lennard_jones(dr2: f64) -> Result<f64, &'static str> {
+    if dr2 < 0.0 {
+        return Err("Lennard-Jones potential is undefined at zero separation");
     }
 
-    let r2: f64 = r.iter().map(|x| x * x).sum();
-    if r2 == 0.0 {
-        return Err(PyValueError::new_err(
-            "Lennard-Jones potential is undefined at zero separation",
-        ));
-    }
+    let inv_dr2 = 1.0 / dr2;
+    let inv_r6 = inv_dr2 * inv_dr2 * inv_dr2;
+    let inv_r12 = inv_r6 * inv_r6;
 
-    let sigma_over_r_sq = (sigma * sigma) / r2;
-    let sigma_over_r_6 = sigma_over_r_sq * sigma_over_r_sq * sigma_over_r_sq;
-    let sigma_over_r_12 = sigma_over_r_6 * sigma_over_r_6;
-
-    Ok(4.0 * epsilon * (sigma_over_r_12 - sigma_over_r_6))
+    Ok(4.0 * (inv_r12 - inv_r6))
 }
 
 /// Calculate the kinetic energy of a particle with velocity vector `v` and mass `m`.
-#[pyfunction]
-#[pyo3(signature = (v, m))]
-pub fn kinetic_energy(v: [f64; 3], m: f64) -> PyResult<f64> {
+pub fn kinetic_energy(v: [f64; 3], m: f64) -> Result<f64, &'static str> {
     if m <= 0.0 {
-        return Err(PyValueError::new_err("The mass must be positive"));
+        return Err("The mass must be positive");
     }
     let v_sq = v[0].mul_add(v[0], v[1].mul_add(v[1], v[2] * v[2]));
     Ok(0.5 * m * v_sq)
@@ -48,16 +32,14 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_lj_zero_at_sigma() {
-        let val = lennard_jones(vec![1.5, 0.0, 0.0], 1.0, 1.5).unwrap();
-        assert!((val - 0.0).abs() < 1e-12);
+    fn test_lennard_jones_floating_point_error() {
+        let expected: f64 = -0.890965287583;
+        let res = lennard_jones(1.2).expect("r is nonzero");
+        assert!((res - expected).abs() < 1e-6);
     }
-
     #[test]
-    fn test_lj_minimum_is_minus_epsilon() {
-        let r_min = 2.0f64.powf(1.0 / 6.0) * 1.5;
-        let val = lennard_jones(vec![r_min, 0.0, 0.0], 2.0, 1.5).unwrap();
-        assert!((val - (-2.0)).abs() < 1e-12);
+    fn test_lennard_jones_returns_error_on_zero_r() {
+        assert!(lennard_jones(0.0).is_err());
     }
 
     #[test]
